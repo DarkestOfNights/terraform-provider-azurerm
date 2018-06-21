@@ -209,8 +209,9 @@ type ArmClient struct {
 	trafficManagerEndpointsClient              trafficmanager.EndpointsClient
 
 	// Web
-	appServicePlansClient web.AppServicePlansClient
-	appServicesClient     web.AppsClient
+	appServicePlansClient         web.AppServicePlansClient
+	appServicesClient             web.AppsClient
+	appServicesCertificatesClient web.CertificatesClient
 
 	// Policy
 	policyAssignmentsClient policy.AssignmentsClient
