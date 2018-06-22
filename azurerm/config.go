@@ -927,6 +927,10 @@ func (c *ArmClient) registerWebClients(endpoint, subscriptionId string, auth aut
 	appsClient := web.NewAppsClientWithBaseURI(endpoint, subscriptionId)
 	c.configureClient(&appsClient.Client, auth)
 	c.appServicesClient = appsClient
+
+	certificateClient := web.NewCertificatesClientWithBaseURI(endpoint, subscriptionId)
+	c.configureClient(&certificateClient.Client, auth)
+	c.appServicesCertificatesClient = certificateClient
 }
 
 func (c *ArmClient) registerPolicyClients(endpoint, subscriptionId string, auth autorest.Authorizer) {

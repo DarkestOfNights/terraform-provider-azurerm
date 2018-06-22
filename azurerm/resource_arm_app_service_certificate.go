@@ -31,6 +31,10 @@ func resourceArmAppServiceCertificate() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"thumbprint": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -42,21 +46,20 @@ func resourceAppServiceCertificateCreateUpdate(d *schema.ResourceData, meta inte
 	log.Printf("[INFO] preparing arguments for App Service Certificate creation.")
 
 	resGroup := d.Get("resource_group_name").(string)
-	name := d.Get("friendly_name").(string)
+	name := d.Get("name").(string)
 	location := d.Get("location").(string)
 	pfxString := d.Get("base_64_encoded_pfx_file").(string)
 	password := d.Get("pfx_password").(string)
 
 	pfxBlob, err := base64.StdEncoding.DecodeString(pfxString)
-	certificateProperties := web.CertificateProperties{
-		PfxBlob:  &pfxBlob,
-		Password: &password,
-	}
 
 	certificate := web.Certificate{
-		Name:                  &name,
-		Location:              &location,
-		CertificateProperties: &certificateProperties,
+		Name:     &name,
+		Location: &location,
+		CertificateProperties: &web.CertificateProperties{
+			PfxBlob:  &pfxBlob,
+			Password: &password,
+		},
 	}
 
 	certificateResult, err := client.CreateOrUpdate(ctx, resGroup, name, certificate)
@@ -74,7 +77,7 @@ func resourceAppServiceCertificateRead(d *schema.ResourceData, meta interface{})
 	ctx := meta.(*ArmClient).StopContext
 
 	resGroup := d.Get("resource_group_name").(string)
-	name := d.Get("friendly_name").(string)
+	name := d.Get("name").(string)
 
 	read, err := client.Get(ctx, resGroup, name)
 	if err != nil {
@@ -87,9 +90,5 @@ func resourceAppServiceCertificateRead(d *schema.ResourceData, meta interface{})
 }
 
 func resourceAppServiceCertificateDelete(d *schema.ResourceData, meta interface{}) error {
-	return nil
-}
-
-func resourceAppServiceCertificateExists(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }

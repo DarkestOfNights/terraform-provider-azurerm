@@ -6,6 +6,7 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/services/web/mgmt/2016-09-01/web"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/utils"
 )
 
@@ -32,6 +33,23 @@ func resourceArmAppServiceCustomHostnameBinding() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+
+			"ssl_state": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					string(web.SniEnabled),
+					string(web.IPBasedEnabled),
+					string(web.Disabled),
+				}, true),
+			},
+
+			"thumbprint": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 		},
 	}
 }
@@ -45,10 +63,14 @@ func resourceArmAppServiceCustomHostnameBindingCreate(d *schema.ResourceData, me
 	resourceGroup := d.Get("resource_group_name").(string)
 	appServiceName := d.Get("app_service_name").(string)
 	hostname := d.Get("hostname").(string)
+	sslState := web.SslState(d.Get("ssl_state").(string))
+	thumbprint := d.Get("thumbprint").(string)
 
 	properties := web.HostNameBinding{
 		HostNameBindingProperties: &web.HostNameBindingProperties{
-			SiteName: utils.String(appServiceName),
+			SiteName:   utils.String(appServiceName),
+			SslState:   sslState,
+			Thumbprint: &thumbprint,
 		},
 	}
 	_, err := client.CreateOrUpdateHostNameBinding(ctx, resourceGroup, appServiceName, hostname, properties)
